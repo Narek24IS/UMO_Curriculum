@@ -3,7 +3,7 @@ from openpyxl.cell.cell import Cell
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from classes import ControlForm, TotalHours, Required, Semester, Discipline
+from classes import ControlForm, TotalHours, RequiredHours, Semester, Discipline
 
 
 class Plan:
@@ -35,35 +35,52 @@ class Plan:
         else:
             return None
 
+    def get_control_form(self, row: list[str], sem_num:int) -> ControlForm:
+        sem = None
+        col = 3
+        while sem is None and col < 9:
+            sem = self.check_value_and_split(row[col])
+            col += 1
+
+        if sem is not None and sem_num in sem:
+            match col:
+                case 3:
+                    return ControlForm.EKZ
+                case 4:
+                    return ControlForm.ZACH
+                case 5:
+                    return ControlForm.ZACH0
+                case 6:
+                    return ControlForm.KP
+                case 7:
+                    return ControlForm.KR
+                case 8:
+                    return ControlForm.DR
+                case _:
+                    return ControlForm.NO
+        else:
+            return ControlForm.NO
+
     def get_semesters_from_row(self, row: list[str]) -> list[Semester]:
         semesters: list[Semester] = []
-        row = row[17:]
+        sem_row = row[17:]
 
-        for i in range(0, len(row), 9):
-            if row[i]:
+        for i in range(0, len(sem_row), 9):
+            if sem_row[i]:
                 num = i // 9 + 1
-                total = self.check_int(row[i])
-                lek = self.check_int(row[i + 1])
-                lab = self.check_int(row[i + 2])
-                pr = self.check_int(row[i + 3])
-                krp = self.check_int(row[i + 4])
-                ip = self.check_int(row[i + 5])
-                sr = self.check_int(row[i + 6])
-                cons = self.check_int(row[i + 7])
-                patt = self.check_int(row[i + 8])
-                semesters.append(Semester(num, total, lek, lab, pr, krp, ip, sr, cons, patt))
+                total = self.check_int(sem_row[i])
+                lek = self.check_int(sem_row[i + 1])
+                lab = self.check_int(sem_row[i + 2])
+                pr = self.check_int(sem_row[i + 3])
+                krp = self.check_int(sem_row[i + 4])
+                ip = self.check_int(sem_row[i + 5])
+                sr = self.check_int(sem_row[i + 6])
+                cons = self.check_int(sem_row[i + 7])
+                patt = self.check_int(sem_row[i + 8])
+                control = self.get_control_form(row, num)
+                semesters.append(Semester(num, total, lek, lab, pr, krp, ip, sr, cons, patt, control))
 
         return semesters
-
-    def get_control_form(self, row: list[str]) -> ControlForm:
-        ekz_sem = self.check_value_and_split(row[3])
-        zach_sem = self.check_value_and_split(row[4])
-        zach0_sem = self.check_value_and_split(row[5])
-        kp_sem = self.check_value_and_split(row[6])
-        kr_sem = self.check_value_and_split(row[7])
-        dr_sem = self.check_value_and_split(row[8])
-
-        return ControlForm(ekz_sem, zach_sem, zach0_sem, kp_sem, kr_sem, dr_sem)
 
     def get_total_hours(self, row: list[str]) -> TotalHours:
         expert = self.check_int(row[9])
@@ -75,11 +92,11 @@ class Plan:
 
         return TotalHours(expert, plan, with_teacher, ip, sr, patt)
 
-    def get_required(self, row: list[str]) -> Required:
+    def get_required(self, row: list[str]) -> RequiredHours:
         important = self.check_int(row[15])
         not_important = self.check_int(row[16])
 
-        return Required(important, not_important)
+        return RequiredHours(important, not_important)
 
     def get_disciplines(self) -> list[Discipline]:
         row: tuple[Cell]
@@ -89,8 +106,6 @@ class Plan:
                 continue
             row: list[str] = [cell.value for cell in row]
 
-            # Получение форм контроля
-            control_form = self.get_control_form(row)
             # Получение общего кол-ва часов
             total_hours = self.get_total_hours(row)
             # Получение обязательной программы
@@ -102,9 +117,8 @@ class Plan:
             in_plan = True if row[0] == '+' else False
             ind = row[1]
             name = row[2]
-            disciplines.append(Discipline(in_plan, ind, name, control_form, total_hours, required, semesters))
+            disciplines.append(Discipline(in_plan, ind, name, total_hours, required, semesters))
 
         return disciplines
 
 
-plan = Plan('Plan.xlsx')
