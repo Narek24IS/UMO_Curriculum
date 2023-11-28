@@ -9,6 +9,7 @@ from classes import ControlForm, TotalHours, RequiredHours, Semester, Discipline
 class Plan:
     def __init__(self, file_path: str):
         self.worksheet = self.open_worksheet_in_file(file_path)
+        self.get_title_info()
         self.disciplines: list[Discipline] = self.get_disciplines()
 
     def open_worksheet_in_file(self, file_path: str) -> Worksheet:
@@ -65,7 +66,7 @@ class Plan:
         semesters: list[Semester] = []
         sem_row = row[17:]
 
-        for i in range(0, len(sem_row), 9):
+        for i in range(0, len(sem_row)-2, 9):
             if sem_row[i]:
                 num = i // 9 + 1
                 total = self.check_int(sem_row[i])
@@ -122,3 +123,21 @@ class Plan:
         return disciplines
 
 
+    def get_title_info(self):
+        title_worksheet = self.workbook['Титул']
+        cell_value_list = title_worksheet['D29'].value.split()
+        if '_x000d_' in cell_value_list:
+            cell_value_list.remove('_x000d_')
+        ind = cell_value_list.index('Профиль')
+        self.name = ' '.join(cell_value_list[:ind])
+        self.cafedra = title_worksheet['D37'].value
+        self.facultet = title_worksheet['D38'].value
+        self.profile = ' '.join(cell_value_list[ind+10:])
+        self.cod = title_worksheet['D27'].value
+        self.kvalik = title_worksheet['C40'].value.split(':')[1]
+        self.edu_form = title_worksheet['C42'].value.split(':')[1]
+        self.start_year = int(title_worksheet['W40'].value)
+        self.standart = title_worksheet['W42'].value
+        self.baza = title_worksheet['C44'].value.split(':')[1]
+
+pl = Plan('Plans/Plan.xlsx')

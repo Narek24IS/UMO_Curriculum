@@ -1,17 +1,39 @@
 import sqlite3
+from plan_parse import Plan
+from classes import Discipline, Semester
+
 
 class PlanDatabase:
-    def __init__(self, db_path='plan_database.db'):
+    def __init__(self, db_path='plan_database.db', new_db:bool = False):
         self.conn = sqlite3.connect(db_path)
-        self.drop_tables()
+        if new_db:
+            self.drop_tables()
+            self.create_tables()
+            self.insert_control_form()
         self.create_tables()
-        self.insert_control_form()
+
 
     def create_tables(self):
         cursor = self.conn.cursor()
         cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS Plan(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT,
+                        cafedra TEXT,
+                        facultet TEXT,
+                        profile TEXT,
+                        cod TEXT,
+                        kvalik TEXT,
+                        edu_form TEXT,
+                        start_year INT,
+                        standart TEXT,
+                        baza TEXT
+            )
+        ''')
+        cursor.execute('''
             CREATE TABLE IF NOT EXISTS Discipline (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                plan_id INT,
                 in_plan BOOL,
                 ind TEXT,
                 name TEXT,
@@ -22,7 +44,8 @@ class PlanDatabase:
                 total_hours_sr INTEGER,
                 total_hours_patt INTEGER,
                 required_important_hours INTEGER,
-                required_not_important_hours INTEGER
+                required_not_important_hours INTEGER,
+                FOREIGN KEY (plan_id) REFERENCES Plan (id)
             )
         ''')
         cursor.execute('''
@@ -61,18 +84,34 @@ class PlanDatabase:
             ''')
         self.conn.commit()
 
+    def insert_plan(self, plan:Plan):
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            INSERT INTO Plan(
+                 name, facultet, cafedra, profile, cod, kvalik,
+                 edu_form, start_year, standart, baza
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            plan.name, plan.facultet, plan.cafedra, plan.profile, plan.cod,
+            plan.kvalik, plan.edu_form, plan.start_year,
+            plan.standart, plan.baza
+        ))
+        plan_id = cursor.lastrowid
+        for discipline in plan.disciplines:
+            self.insert_discipline(int(plan_id), discipline)
+        self.conn.commit()
 
-    def insert_discipline(self, discipline):
+    def insert_discipline(self, plan_id:int, discipline:Discipline):
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO Discipline (
-                in_plan, ind, name,
+                in_plan, ind, name, plan_id,
                 total_hours_expert, total_hours_plan, total_hours_with_teacher,
                 total_hours_ip, total_hours_sr, total_hours_patt,
                 required_important_hours, required_not_important_hours
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
-            discipline.in_plan, discipline.ind, discipline.name,
+            discipline.in_plan, discipline.ind, discipline.name, plan_id,
             discipline.total_hours.expert, discipline.total_hours.plan, discipline.total_hours.with_teacher,
             discipline.total_hours.ip, discipline.total_hours.sr, discipline.total_hours.patt,
             discipline.required.important, discipline.required.not_important
@@ -82,7 +121,7 @@ class PlanDatabase:
             self.insert_semester(discipline_id, semester)
         self.conn.commit()
 
-    def insert_semester(self, discipline_id, semester):
+    def insert_semester(self, discipline_id:int, semester:Semester):
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO Semester (
@@ -101,6 +140,9 @@ class PlanDatabase:
         cursor = self.conn.cursor()
         cursor.execute('''
             drop table if exists ControlForm;
+            ''')
+        cursor.execute('''
+            drop table if exists Plan;
             ''')
         cursor.execute('''
             drop table if exists Discipline;
