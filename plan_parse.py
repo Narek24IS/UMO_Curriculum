@@ -7,40 +7,54 @@ from classes import ControlForm, TotalHours, RequiredHours, Semester, Discipline
 
 
 class Plan:
+    """
+    Класс, хранящий в себе всю информацию из одного файла учебного плана.
+    Имеет методы для обработки этого файла и их сохранения в объекты класса
+    """
+
+    # file_path - путь к файлу учебного плана
     def __init__(self, file_path: str):
-        self.worksheet = self.open_worksheet_in_file(file_path)
+        # Открываем файл и получаем объект листа с планом
+        self.plan_worksheet = self.__open_worksheet_in_file(file_path)
+        # Получение информации с титульного листа документа
         self.get_title_info()
+        # Получение информации про все дисциплины из файла
         self.disciplines: list[Discipline] = self.get_disciplines()
 
-    def open_worksheet_in_file(self, file_path: str) -> Worksheet:
+    def __open_worksheet_in_file(self, file_path: str) -> Worksheet:
+        """Открывает файл по его пути и возвращает лист с планом"""
         # Загрузка файла Excel
         self.workbook: Workbook = openpyxl.load_workbook(file_path)
         # Получение листа по имени
         return self.workbook['План']
 
     @staticmethod
-    def is_bold(cell: Cell) -> bool:
+    def __is_bold(cell: Cell) -> bool:
+        """Проверка ячейки на жирность шрифта"""
         return cell.font.bold
 
     @staticmethod
-    def check_value_and_split(value: str | None) -> list[int] | None:
+    def __check_value_and_split(value: str | None) -> list[int] | None:
+        """Проверка значения на None и разделение его посимвольно, с превращением в числа"""
         if value:
             return [int(x) for x in value]
         else:
             return None
 
     @staticmethod
-    def check_int(value: str | None) -> int | None:
+    def __check_int(value: str | None) -> int | None:
+        """Проверка значения на None и превращение в число"""
         if value:
             return int(value)
         else:
             return None
 
-    def get_control_form(self, row: list[str], sem_num:int) -> ControlForm:
+    def __get_control_form(self, row: list[str], sem_num: int) -> ControlForm:
+        """Получение информации о том, какая именно форма контроля у дисциплины в переданной строке"""
         sem = None
         col = 3
         while sem is None and col < 9:
-            sem = self.check_value_and_split(row[col])
+            sem = self.__check_value_and_split(row[col])
             col += 1
 
         if sem is not None and sem_num in sem:
@@ -62,48 +76,52 @@ class Plan:
         else:
             return ControlForm.NO
 
-    def get_semesters_from_row(self, row: list[str]) -> list[Semester]:
+    def __get_semesters_from_row(self, row: list[str]) -> list[Semester]:
+        """Получение информации про семестры и часы в переданной строке"""
         semesters: list[Semester] = []
         sem_row = row[17:]
 
-        for i in range(0, len(sem_row)-2, 9):
+        for i in range(0, len(sem_row) - 2, 9):
             if sem_row[i]:
                 num = i // 9 + 1
-                total = self.check_int(sem_row[i])
-                lek = self.check_int(sem_row[i + 1])
-                lab = self.check_int(sem_row[i + 2])
-                pr = self.check_int(sem_row[i + 3])
-                krp = self.check_int(sem_row[i + 4])
-                ip = self.check_int(sem_row[i + 5])
-                sr = self.check_int(sem_row[i + 6])
-                cons = self.check_int(sem_row[i + 7])
-                patt = self.check_int(sem_row[i + 8])
-                control = self.get_control_form(row, num)
+                total = self.__check_int(sem_row[i])
+                lek = self.__check_int(sem_row[i + 1])
+                lab = self.__check_int(sem_row[i + 2])
+                pr = self.__check_int(sem_row[i + 3])
+                krp = self.__check_int(sem_row[i + 4])
+                ip = self.__check_int(sem_row[i + 5])
+                sr = self.__check_int(sem_row[i + 6])
+                cons = self.__check_int(sem_row[i + 7])
+                patt = self.__check_int(sem_row[i + 8])
+                control = self.__get_control_form(row, num)
                 semesters.append(Semester(num, total, lek, lab, pr, krp, ip, sr, cons, patt, control))
 
         return semesters
 
     def get_total_hours(self, row: list[str]) -> TotalHours:
-        expert = self.check_int(row[9])
-        plan = self.check_int(row[10])
-        with_teacher = self.check_int(row[11])
-        ip = self.check_int(row[12])
-        sr = self.check_int(row[13])
-        patt = self.check_int(row[14])
+        """Получение общего количества академических часов в переданной строке"""
+        expert = self.__check_int(row[9])
+        plan = self.__check_int(row[10])
+        with_teacher = self.__check_int(row[11])
+        ip = self.__check_int(row[12])
+        sr = self.__check_int(row[13])
+        patt = self.__check_int(row[14])
 
         return TotalHours(expert, plan, with_teacher, ip, sr, patt)
 
     def get_required(self, row: list[str]) -> RequiredHours:
-        important = self.check_int(row[15])
-        not_important = self.check_int(row[16])
+        """Получение объёма ОП в переданной строке"""
+        important = self.__check_int(row[15])
+        not_important = self.__check_int(row[16])
 
         return RequiredHours(important, not_important)
 
     def get_disciplines(self) -> list[Discipline]:
+        """Получение всех дисциплин в файле и информации про них"""
         row: tuple[Cell]
         disciplines: list[Discipline] = []
-        for row in self.worksheet.iter_rows(min_row=6, max_row=self.worksheet.max_row):
-            if self.is_bold(row[2]) or row[2].value is None:
+        for row in self.plan_worksheet.iter_rows(min_row=6, max_row=self.plan_worksheet.max_row):
+            if self.__is_bold(row[2]) or row[2].value is None:
                 continue
             row: list[str] = [cell.value for cell in row]
 
@@ -112,7 +130,7 @@ class Plan:
             # Получение обязательной программы
             required = self.get_required(row)
             # Получение семестров, в которых будут формы контроля
-            semesters = self.get_semesters_from_row(row)
+            semesters = self.__get_semesters_from_row(row)
 
             # Получение индекса, названия и статуса дисциплины
             in_plan = True if row[0] == '+' else False
@@ -122,8 +140,8 @@ class Plan:
 
         return disciplines
 
-
     def get_title_info(self):
+        """Получение информации с титульного листа в файле"""
         title_worksheet = self.workbook['Титул']
         cell_value_list = title_worksheet['D29'].value.split()
         if '_x000d_' in cell_value_list:
@@ -132,12 +150,10 @@ class Plan:
         self.name = ' '.join(cell_value_list[:ind])
         self.cafedra = title_worksheet['D37'].value
         self.facultet = title_worksheet['D38'].value
-        self.profile = ' '.join(cell_value_list[ind+10:])
+        self.profile = ' '.join(cell_value_list[ind + 10:])
         self.cod = title_worksheet['D27'].value
         self.kvalik = title_worksheet['C40'].value.split(':')[1]
         self.edu_form = title_worksheet['C42'].value.split(':')[1]
         self.start_year = int(title_worksheet['W40'].value)
         self.standart = title_worksheet['W42'].value
         self.baza = title_worksheet['C44'].value.split(':')[1]
-
-pl = Plan('Plans/Plan.xlsx')

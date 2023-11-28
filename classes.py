@@ -4,6 +4,7 @@ from enum import Enum
 from xml.dom.minidom import Element
 
 class ControlForm(Enum):
+    """Класс, каждое значение которого означает одну из форм контроля"""
     EKZ = 1
     ZACH = 2
     ZACH0 = 3
@@ -14,6 +15,7 @@ class ControlForm(Enum):
 
 @dataclass
 class TotalHours:
+    """Класс, в котором хранится общее количество часов за все семестры по одной дисциплне"""
     # Кол-во необходимых часов по экспертному мнению
     expert: int
     # Всего часов по плану
@@ -29,11 +31,13 @@ class TotalHours:
 
 @dataclass
 class RequiredHours:
+    """Класс с объёмом ОП"""
     important: int
     not_important: int
 
 @dataclass
 class Semester:
+    """Класс, в котором хранится вся информация об одном семестре"""
     # Номер семестра
     num: int
     # Всего часов в семестре
@@ -58,6 +62,7 @@ class Semester:
     control_form: ControlForm
 
 class Discipline:
+    """Класс, в котором хранится вся информация об одной дисциплине"""
     def __init__(self, in_plan: bool, ind: str, name: str,
                  total_hours: TotalHours, required: RequiredHours, semesters: list[Semester]):
         # Считать ли в плане
@@ -77,5 +82,3 @@ class Discipline:
         return (f'{self.in_plan} {self.ind} {self.name} {self.total_hours}'
                 f'{self.required} {self.semesters}')
 
-
-con = ControlForm.NO

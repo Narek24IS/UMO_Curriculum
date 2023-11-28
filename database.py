@@ -4,16 +4,20 @@ from classes import Discipline, Semester
 
 
 class PlanDatabase:
+    """Класс, который создаёт БД и имеет методы, которые являются интерфейсами этой БД"""
     def __init__(self, db_path='plan_database.db', new_db:bool = False):
         self.conn = sqlite3.connect(db_path)
+        # Если флаг имеет значение True удаляются все таблица, создаются по новой и заполняются нужными данными
         if new_db:
             self.drop_tables()
             self.create_tables()
             self.insert_control_form()
+        # Проверят созданы ли все таблицы и создаёт их в противном случае
         self.create_tables()
 
 
     def create_tables(self):
+        """Создание всех таблиц в БД, если их нет"""
         cursor = self.conn.cursor()
         cursor.execute('''
                     CREATE TABLE IF NOT EXISTS Plan(
@@ -76,6 +80,7 @@ class PlanDatabase:
         self.conn.commit()
 
     def insert_control_form(self):
+        """Вставляет в таблицу ControlForm все существующие формы контроля"""
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO ControlForm (name)
@@ -85,6 +90,7 @@ class PlanDatabase:
         self.conn.commit()
 
     def insert_plan(self, plan:Plan):
+        """Вставляет все данные из объекта класса Plan в БД"""
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO Plan(
@@ -97,11 +103,13 @@ class PlanDatabase:
             plan.standart, plan.baza
         ))
         plan_id = cursor.lastrowid
+        # Перебирает все дисциплины в плане и вставляет их в БД
         for discipline in plan.disciplines:
             self.insert_discipline(int(plan_id), discipline)
         self.conn.commit()
 
     def insert_discipline(self, plan_id:int, discipline:Discipline):
+        """Вставляет все данные из объекта класса Discipline в БД"""
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO Discipline (
@@ -117,11 +125,13 @@ class PlanDatabase:
             discipline.required.important, discipline.required.not_important
         ))
         discipline_id = cursor.lastrowid
+        # Перебирает все семестры в дисциплине и вставляет их в БД
         for semester in discipline.semesters:
             self.insert_semester(discipline_id, semester)
         self.conn.commit()
 
     def insert_semester(self, discipline_id:int, semester:Semester):
+        """Вставляет все данные из объекта класса Semester в БД"""
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO Semester (
@@ -137,6 +147,7 @@ class PlanDatabase:
 
 
     def drop_tables(self):
+        """Удаляет все имеющиеся в БД таблицы"""
         cursor = self.conn.cursor()
         cursor.execute('''
             drop table if exists ControlForm;
