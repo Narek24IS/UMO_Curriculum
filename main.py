@@ -30,6 +30,6 @@ if __name__=='__main__':
     # # Вставляем данные из файла в БД
     # db.insert_plan(plan)
     # Создаём БД, в который будем загружать данные
-    db = PlanDatabase('planDB.sqlite', new_db = False)
+    db = PlanDatabase('planDB.sqlite', new_db = True)
     load_files_to_database('Plans', db)
 
