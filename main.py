@@ -33,7 +33,10 @@ def load_files_to_database(path: str, db: PlanDatabase) -> None:
 
 
 if __name__ == '__main__':
-    path = sys.argv[1] if sys.argv[1] else 'Plans'
+    if len(sys.argv) > 1:
+        path = sys.argv[1]
+    else:
+        path = 'Plans'
     # Создаём интерфейс базы данных
     # new_db - флаг, который указывает, будет ли БД пересоздана
     db = PlanDatabase('planDB.sqlite', new_db=True)
