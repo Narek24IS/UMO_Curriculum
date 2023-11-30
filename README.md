@@ -11,8 +11,8 @@
 
 Далее открываем терминал и переходим в ней в папку с проектом.
 Создаём виртуальное окружение и устанавливаем зависимости:
-`python3.10 -m venv env`
-`source env/bin/activate`
+`python3.10 -m venv venv`
+`source venv/bin/activate`
 `pip install -r requirements.txt`
 
 Запуск скрипта: `python main.py <Название папки с файлами или путь к нему>`
