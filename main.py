@@ -1,4 +1,5 @@
 import os
+import sys
 
 from database import PlanDatabase
 from plan_parse import Plan
@@ -27,12 +28,14 @@ def load_files_to_database(path: str, db: PlanDatabase) -> None:
                     db.insert_plan(plan)
                     print(f'План специальности "{plan.name}" добавлен в базу данных')
                 except:
-                    print(f'Файл "{file}" не удалось обработать')
+                    print(f'Файл "{file}" не удалось обработать. Неправильный шаблон файла!')
                     continue
 
 
 if __name__ == '__main__':
+    path = sys.argv[1] if sys.argv[1] else 'Plans'
     # Создаём интерфейс базы данных
     # new_db - флаг, который указывает, будет ли БД пересоздана
     db = PlanDatabase('planDB.sqlite', new_db=True)
-    load_files_to_database('Plans', db)
+    load_files_to_database(path, db)
+    print('Все файлы обработаны!')

@@ -1,11 +1,13 @@
 import sqlite3
-from plan_parse import Plan
+
 from classes import Discipline, Semester
+from plan_parse import Plan
 
 
 class PlanDatabase:
     """Класс, который создаёт БД и имеет методы, которые являются интерфейсами этой БД"""
-    def __init__(self, db_path='plan_database.db', new_db:bool = False):
+
+    def __init__(self, db_path='plan_database.db', new_db: bool = False):
         self.conn = sqlite3.connect(db_path)
         # Если флаг имеет значение True удаляются все таблица, создаются по новой и заполняются нужными данными
         if new_db:
@@ -14,7 +16,6 @@ class PlanDatabase:
             self.insert_control_form()
         # Проверят созданы ли все таблицы и создаёт их в противном случае
         self.create_tables()
-
 
     def create_tables(self):
         """Создание всех таблиц в БД, если их нет"""
@@ -89,7 +90,7 @@ class PlanDatabase:
             ''')
         self.conn.commit()
 
-    def insert_plan(self, plan:Plan):
+    def insert_plan(self, plan: Plan):
         """Вставляет все данные из объекта класса Plan в БД"""
         cursor = self.conn.cursor()
         cursor.execute('''
@@ -108,7 +109,7 @@ class PlanDatabase:
             self.insert_discipline(int(plan_id), discipline)
         self.conn.commit()
 
-    def insert_discipline(self, plan_id:int, discipline:Discipline):
+    def insert_discipline(self, plan_id: int, discipline: Discipline):
         """Вставляет все данные из объекта класса Discipline в БД"""
         cursor = self.conn.cursor()
         cursor.execute('''
@@ -130,7 +131,7 @@ class PlanDatabase:
             self.insert_semester(discipline_id, semester)
         self.conn.commit()
 
-    def insert_semester(self, discipline_id:int, semester:Semester):
+    def insert_semester(self, discipline_id: int, semester: Semester):
         """Вставляет все данные из объекта класса Semester в БД"""
         cursor = self.conn.cursor()
         cursor.execute('''
@@ -144,7 +145,6 @@ class PlanDatabase:
             semester.cons, semester.patt
         ))
         self.conn.commit()
-
 
     def drop_tables(self):
         """Удаляет все имеющиеся в БД таблицы"""
@@ -163,7 +163,3 @@ class PlanDatabase:
             ''')
 
         self.conn.commit()
-
-
-
-

@@ -1,7 +1,6 @@
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from enum import Enum
-from xml.dom.minidom import Element
+
 
 class ControlForm(Enum):
     """Класс, каждое значение которого означает одну из форм контроля"""
@@ -12,6 +11,7 @@ class ControlForm(Enum):
     KR = 5
     DR = 6
     NO = None
+
 
 @dataclass
 class TotalHours:
@@ -29,11 +29,13 @@ class TotalHours:
     # Количество часов выделенных на предпрофессиональную аттестацию
     patt: int
 
+
 @dataclass
 class RequiredHours:
     """Класс с объёмом ОП"""
     important: int
     not_important: int
+
 
 @dataclass
 class Semester:
@@ -61,8 +63,10 @@ class Semester:
     # Какая будет форма контроля
     control_form: ControlForm
 
+
 class Discipline:
     """Класс, в котором хранится вся информация об одной дисциплине"""
+
     def __init__(self, in_plan: bool, ind: str, name: str,
                  total_hours: TotalHours, required: RequiredHours, semesters: list[Semester]):
         # Считать ли в плане
@@ -81,4 +85,3 @@ class Discipline:
     def __str__(self):
         return (f'{self.in_plan} {self.ind} {self.name} {self.total_hours}'
                 f'{self.required} {self.semesters}')
-
