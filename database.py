@@ -146,6 +146,25 @@ class PlanDatabase:
         ))
         self.conn.commit()
 
+    def create_view(self):
+        cursor = self.conn.cursor()
+        cursor.execute('''drop view if exists All_data;''')
+        cursor.execute('''
+        create view All_data as
+        select P.name Направление, P.cafedra Кафедра, P.facultet Факультет, P.profile Профиль,
+           P.cod Код_специальности, P.kvalik Квалификация, P.edu_form Форма_обучения,
+           P.start_year Год_начала, P.standart Стандарт_ФГОС, P.baza База,
+           D.in_plan В_плане, D.ind Индекс_дисциплины, D.name Дисциплина,
+           D.total_hours_expert Экспертное, D.total_hours_plan По_плану, D.total_hours_with_teacher С_препод,
+           D.total_hours_ip ИП, D.total_hours_sr СР, D.total_hours_patt ПАтт,
+           D.required_important_hours `Обяз. часть`, D.required_not_important_hours `Вар. часть`,
+           S.num Семестр, S.total Всего, S.lek Лек, S.lab Лаб, S.pr Пр, S.krp Крп, S.ip ИП,
+           S.sr СР, S.cons Конс, S.patt ПАтт, CF.name Форма_контроля
+        from Plan P
+             join main.Discipline D on P.id = D.plan_id
+             join main.Semester S on D.id = S.discipline_id
+             join main.ControlForm CF on S.control_form_id = CF.id;''')
+
     def drop_tables(self):
         """Удаляет все имеющиеся в БД таблицы"""
         cursor = self.conn.cursor()

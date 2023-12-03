@@ -1,7 +1,10 @@
 import os
 import sys
 
+from PyQt6.QtWidgets import QApplication
+
 from database import PlanDatabase
+from interface.MainWindow import MainWindow
 from plan_parse import Plan
 
 
@@ -32,13 +35,10 @@ def load_files_to_database(path: str, db: PlanDatabase) -> None:
                     continue
 
 
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        path = sys.argv[1]
-    else:
-        path = 'Plans'
-    # Создаём интерфейс базы данных
-    # new_db - флаг, который указывает, будет ли БД пересоздана
-    db = PlanDatabase('planDB.sqlite', new_db=True)
-    load_files_to_database(path, db)
-    print('Все файлы обработаны!')
+if __name__=='__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
+
+
