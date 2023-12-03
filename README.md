@@ -15,4 +15,4 @@
 `source venv/bin/activate`
 `pip install -r requirements.txt`
 
-Запуск скрипта: `python main.py
+Запуск скрипта: `python main.py`
