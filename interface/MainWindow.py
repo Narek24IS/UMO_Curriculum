@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
                              "Вы можете выбрать какая вам нужна информация во второй\n"
                              "вкладке и посмотреть результаты в третьей вкладке.\n"
                              "Вы также можете экспортировать текущую таблицу в Excel\n"
-                             "нажав на кнопку 'Экспортировать в Excel' на третьей вкладке.")
+                             "нажав на кнопку 'Экспортировать в Excel' на третьей вкладке и введите имя файла.")
 
         self.ui.select_btn.clicked.connect(self.open_select_dialog)
         self.ui.proc_btn.clicked.connect(self.load_files_to_database)
