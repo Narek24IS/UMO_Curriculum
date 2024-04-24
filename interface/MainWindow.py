@@ -67,9 +67,8 @@ class MainWindow(QMainWindow):
             error_files = []
             if self.path:
                 self.ui.proc_btn.setText('Обработка...')
-                self.show_message('Идёт обработка', "Не закрывайте приложение, идёт обработка файлов!\n"
-                                                    "Для продолжения работы нажмите 'OK'")
-
+                self.show_message('Внимание!', "После нажатия на кнопку 'ОК' - приложение зависнет!\n"
+                                        "Не закрывайте приложение, будет идти обработка файлов!")
             for root, dirs, files in os.walk(self.path):
                 for file in files:
                     # Если формат файла - xlsx

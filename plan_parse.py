@@ -154,6 +154,6 @@ class Plan:
         self.cod = title_worksheet['D27'].value
         self.kvalik = title_worksheet['C40'].value.split(':')[1]
         self.edu_form = title_worksheet['C42'].value.split(':')[1]
-        self.start_year = int(title_worksheet['W40'].value)
+        self.start_year = int(title_worksheet['W40'].value) if title_worksheet['W40'].value else 0
         self.standart = title_worksheet['W42'].value
         self.baza = title_worksheet['C44'].value.split(':')[1]
